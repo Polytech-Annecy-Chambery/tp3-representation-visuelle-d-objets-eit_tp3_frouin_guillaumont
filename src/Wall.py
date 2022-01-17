@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 """
 Created on Thu Nov 16 19:47:50 2017
@@ -64,10 +65,23 @@ class Wall:
     # Adds an object    
     def add(self, x):    
         # A compléter en remplaçant pass par votre code
-        pass        
+        good_section = self.findSection(x)
+        if good_section == None :
+          return self
+        L = good_section[1].createOpening(x)
+        self.objects.extend(L)
+        self.objects.pop(good_section[0])
+        return self 
                     
     # Draws the faces
     def draw(self):
         # A compléter en remplaçant pass par votre code
-        pass
+        gl.glPushMatrix()
+        gl.glRotatef(self.parameters['orientation'], 0, 0, 1)
+        gl.glTranslatef(self.parameters['position'][0], self.parameters['position'][1], self.parameters['position'][2])
+        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL)
+        self.parentSection.drawEdges()
+        for i in self.objects :
+          i.draw()
+        gl.glPopMatrix()
   

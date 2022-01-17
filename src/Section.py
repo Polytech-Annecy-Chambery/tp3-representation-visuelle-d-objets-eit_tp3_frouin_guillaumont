@@ -52,30 +52,99 @@ class Section:
 
     # Defines the vertices and faces 
     def generate(self):
-        self.vertices = [ 
-                # Définir ici les sommets
+        self.vertices = [
+                [0,0,0],
+                [0,0,self.parameters['height']],
+                [self.parameters['width'],0,self.parameters['height']],
+                [self.parameters['width'],0,0],
+                [0,self.parameters['thickness'],0],
+                [0,self.parameters['thickness'],self.parameters['height']],
+                [self.parameters['width'],self.parameters['thickness'],self.parameters['height']],
+                [self.parameters['width'],self.parameters['thickness'],0]
                 ]
+        
         self.faces = [
-                # définir ici les faces
-                ]   
+                [0,3,2,1],
+                [4,7,6,5],
+                [0,4,5,1],
+                [3,7,6,2],
+                [0,4,7,3],
+                [1,5,6,2]
+                ]    
 
     # Checks if the opening can be created for the object x
     def canCreateOpening(self, x):
         # A compléter en remplaçant pass par votre code
-        pass      
+        if x.parameters['thickness'] == self.parameters['thickness'] :
+          if x.parameters['position'][0] >= self.parameters['position'][0] :
+            if x.parameters['position'][1] >= self.parameters['position'][1] :
+              if x.parameters['position'][2] >= self.parameters['position'][2] :
+                if x.parameters['position'][2] + x.parameters['height'] <= self.parameters['position'][2] + self.parameters['height']:
+                  if x.parameters['position'][0] + x.parameters['width'] <= self.parameters['position'][0] + self.parameters['width']:
+                    return True 
+        return False      
         
     # Creates the new sections for the object x
     def createNewSections(self, x):
         # A compléter en remplaçant pass par votre code
-        pass              
+        if self.canCreateOpening(x) == True:
+            section1 = Section({'position':self.parameters['position'], 
+                     'width':x.parameters['position'][0],
+                     'height':self.parameters['height'],
+                     'thickness': self.parameters['thickness']})
+            
+            section2 = Section({'position':[x.parameters['position'][0],x.parameters['position'][1],x.parameters['position'][2]+x.parameters['height']],
+                     'width':x.parameters['width'],
+                     'height':self.parameters['height']-x.parameters['position'][2]-x.parameters['height'],
+                     'thickness': self.parameters['thickness']})
+            
+            section3 = Section({'position':[x.parameters['position'][0],self.parameters['position'][1],self.parameters['position'][2]],
+                     'width':x.parameters['width'],
+                     'height':x.parameters['position'][2],
+                     'thickness': x.parameters['thickness']})
+            
+            section4 = Section({'position':[x.parameters['position'][0]+x.parameters['width'],x.parameters['position'][1],self.parameters['position'][2]],
+                     'width':self.parameters['width']-x.parameters['position'][0]-x.parameters['width'],
+                     'height':self.parameters['height'],
+                     'thickness': x.parameters['thickness']})
+            
+            return [section1,section2,section3,section4]
+                      
         
     # Draws the edges
     def drawEdges(self):
         # A compléter en remplaçant pass par votre code
-        pass           
+        gl.glPushMatrix()
+        gl.glTranslate(self.parameters['position'][0],self.parameters['position'][1],self.parameters['position'][2])
+        gl.glRotate(self.parameters['orientation'],0,0,1)
+        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE)
+        for i in self.faces:
+            gl.glBegin(gl.GL_QUADS)
+            gl.glColor3fv([self.parameters['color'][0]*0.5,self.parameters['color'][1]*0.5,self.parameters['color'][2]*0.5])
+            for j in i:
+                gl.glVertex3fv(self.vertices[j])
+            gl.glEnd()
+        gl.glPopMatrix()           
                     
     # Draws the faces
     def draw(self):
         # A compléter en remplaçant pass par votre code
-        pass
+        if self.parameters['edges']:
+            self.drawEdges()
+        
+        
+        for face in self.faces:
+            gl.glPushMatrix()
+            gl.glTranslate(self.parameters['position'][0],self.parameters['position'][1],self.parameters['position'][2])
+            gl.glRotate(self.parameters['orientation'],0,0,1)
+        
+            gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL)
+            gl.glBegin(gl.GL_QUADS)
+            gl.glColor3fv([0.5, 0.5, 0.5])
+            gl.glVertex3fv(self.vertices[face[0]])
+            gl.glVertex3fv(self.vertices[face[1]])
+            gl.glVertex3fv(self.vertices[face[2]])
+            gl.glVertex3fv(self.vertices[face[3]])
+            gl.glEnd()
+            gl.glPopMatrix()
   
